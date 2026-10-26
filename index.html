@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creeper.gg - Multiwymiarowy Serwer Minecraft</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-green: #55FF55;
+            --dark-green: #00AA00;
+            --nether-red: #ff3333;
+            --nether-orange: #ff6600;
+            --end-purple: #a855f7;
+            --end-magenta: #ec4899;
+            --portal-cyan: #00f2fe;
+            --bg-dark: #08070c;
+            --card-bg: rgba(20, 18, 28, 0.85);
+            --card-border: #2e2640;
+            --text-light: #f0f0f0;
+            --text-gray: #aaa;
+            --pokemon-gold: #ffcb05;
+            --discord-color: #5865F2;
+            --tiktok-color: #ff0050;
+            --youtube-color: #ff0000;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            position: relative;
+            transition: background 0.6s ease;
+        }
+
+        /* --- BACKGROUND --- */
+        .bg-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            overflow: hidden;
+            background: radial-gradient(circle at 50% 30%, #150f24 0%, #08060c 100%);
+            transition: all 0.6s ease;
+        }
+
+        body.dimension-home .bg-container {
+            background: radial-gradient(circle at 50% 30%, #161233 0%, #05040a 100%);
+        }
+        body.dimension-shop .bg-container {
+            background: radial-gradient(circle at 50% 30%, #2e090c 0%, #0a0203 100%);
+        }
+        body.dimension-rules .bg-container {
+            background: radial-gradient(circle at 50% 30%, #1a082b 0%, #06020c 100%);
+        }
+        body.dimension-socials .bg-container {
+            background: radial-gradient(circle at 50% 30%, #08212e 0%, #02090e 100%);
+        }
+
+        .creeper-pattern {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0.04;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8" fill="%2355FF55"><path d="M0 0h8v8H0zM1 1h6v6H1zM2 2h1v2H2zM5 2h1v2H5zM3 4h2v2H3zM2 5h1v2H2zM5 5h1v2H5z"/></svg>');
+            background-size: 140px;
+        }
+
+        .ambient-glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            filter: blur(140px);
+            opacity: 0.25;
+            transition: background 0.6s ease;
+        }
+
+        .glow-1 { top: -100px; left: -100px; background: var(--end-purple); }
+        .glow-2 { bottom: -150px; right: -100px; background: var(--end-magenta); }
+
+        body.dimension-shop .glow-1 { background: var(--nether-red); }
+        body.dimension-shop .glow-2 { background: var(--nether-orange); }
+
+        body.dimension-rules .glow-1 { background: var(--end-purple); }
+        body.dimension-rules .glow-2 { background: #6b21a8; }
+
+        body.dimension-socials .glow-1 { background: var(--portal-cyan); }
+        body.dimension-socials .glow-2 { background: #3b82f6; }
+
+        /* --- CREEPER ROGOWY --- */
+        .corner-creeper {
+            position: fixed;
+            top: -15px;
+            right: -15px;
+            width: 110px;
+            height: 110px;
+            z-index: 100;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+            transition: transform 0.3s ease;
+        }
+
+        .corner-creeper:hover {
+            transform: scale(1.15) rotate(-5deg);
+        }
+
+        /* --- HEADER & NAVIGATION --- */
+        header {
+            padding: 40px 20px 20px;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .logo {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 3rem;
+            color: var(--primary-green);
+            text-shadow: 4px 4px 0px #000, 0 0 25px rgba(85, 255, 85, 0.5);
+            margin-bottom: 15px;
+            letter-spacing: -1px;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .logo span {
+            color: #fff;
+            text-shadow: 4px 4px 0px #000, 0 0 25px rgba(168, 85, 247, 0.6);
+        }
+
+        .back-nav {
+            display: none;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(5px);
+            transition: 0.3s;
+            cursor: pointer;
+        }
+
+        .btn-back:hover {
+            background: rgba(85, 255, 85, 0.2);
+            border-color: var(--primary-green);
+            color: var(--primary-green);
+        }
+
+        .btn-back-prev {
+            background: rgba(255, 102, 0, 0.15);
+            border-color: rgba(255, 102, 0, 0.4);
+            color: var(--nether-orange);
+        }
+
+        .btn-back-prev:hover {
+            background: rgba(255, 102, 0, 0.3);
+            border-color: var(--nether-orange);
+            color: #fff;
+        }
+
+        /* --- MAIN CONTAINER --- */
+        main {
+            width: 100%;
+            max-width: 1050px;
+            margin: 0 auto;
+            padding: 0 20px 60px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .page {
+            display: none;
+            width: 100%;
+            animation: fadeIn 0.4s ease-in-out forwards;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .dimension-badge {
+            display: inline-block;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.75rem;
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        .badge-nether { background: rgba(255, 51, 51, 0.15); color: var(--nether-orange); border: 1px solid var(--nether-red); }
+        .badge-end { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid var(--end-purple); }
+        .badge-socials { background: rgba(0, 242, 254, 0.15); color: var(--portal-cyan); border: 1px solid var(--portal-cyan); }
+
+        /* --- STRONA GŁÓWNA --- */
+        .home-container { text-align: center; }
+
+        .hero-title {
+            font-size: 2.6rem;
+            font-weight: 800;
+            line-height: 1.25;
+            margin-bottom: 15px;
+            color: #fff;
+            text-transform: uppercase;
+        }
+
+        .hero-title span.player-count {
+            color: var(--primary-green);
+            text-shadow: 0 0 25px rgba(85, 255, 85, 0.6);
+            font-size: 3rem;
+            margin: 0 4px;
+        }
+
+        .hero-subtitle {
+            color: var(--text-gray);
+            font-size: 1.05rem;
+            margin-bottom: 40px;
+        }
+
+        .home-grid-nav {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .nav-card {
+            background: linear-gradient(145deg, rgba(23, 19, 36, 0.9), rgba(12, 10, 18, 0.9));
+            border: 2px solid var(--card-border);
+            border-radius: 16px;
+            padding: 40px 25px;
+            text-align: center;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-card:hover { transform: translateY(-8px); }
+
+        .nav-card.card-shop:hover {
+            border-color: var(--nether-orange);
+            box-shadow: 0 10px 30px rgba(255, 102, 0, 0.25);
+        }
+
+        .nav-card.card-rules:hover {
+            border-color: var(--end-purple);
+            box-shadow: 0 10px 30px rgba(168, 85, 247, 0.25);
+        }
+
+        .nav-card.card-social:hover {
+            border-color: var(--portal-cyan);
+            box-shadow: 0 10px 30px rgba(0, 242, 254, 0.25);
+        }
+
+        .nav-card-title { font-size: 1.4rem; font-weight: 800; text-transform: uppercase; }
+        .nav-card-desc { font-size: 0.9rem; color: var(--text-gray); line-height: 1.4; }
+
+        .ip-container {
+            background: rgba(15, 12, 25, 0.9);
+            border: 2px dashed var(--end-purple);
+            padding: 20px 30px;
+            border-radius: 12px;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
+
+        .ip-container:hover {
+            border-color: var(--primary-green);
+            transform: scale(1.02);
+            box-shadow: 0 0 25px rgba(85, 255, 85, 0.2);
+        }
+
+        .ip-text {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1rem;
+            color: var(--primary-green);
+        }
+
+        .ip-hint { font-size: 0.8rem; color: var(--text-gray); }
+
+        /* --- WYBÓR TRYBU Z RAKIETĄ FAJERWERKI 1:1 --- */
+        #shop-modes { text-align: center; }
+
+        .modes-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 0;
+        }
+
+        .skin-mode-btn {
+            background: linear-gradient(145deg, rgba(35, 12, 16, 0.95), rgba(18, 6, 9, 0.95));
+            border: 3px solid var(--nether-orange);
+            border-radius: 24px;
+            padding: 40px 60px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            transition: 0.3s ease;
+            box-shadow: 0 10px 35px rgba(255, 102, 0, 0.3);
+            text-decoration: none;
+            position: relative;
+        }
+
+        .skin-mode-btn:hover {
+            transform: translateY(-6px) scale(1.04);
+            border-color: var(--primary-green);
+            box-shadow: 0 15px 45px rgba(85, 255, 85, 0.4);
+        }
+
+        .firework-box {
+            width: 150px;
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .mc-firework-svg {
+            width: 140px;
+            height: 140px;
+            image-rendering: pixelated;
+            filter: drop-shadow(0 0 18px rgba(255, 102, 0, 0.9));
+        }
+
+        .skin-mode-text {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1.1rem;
+            color: var(--nether-orange);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* --- SKLEP (OFERTY) --- */
+        #shop { text-align: center; }
+        .shop-category { margin-bottom: 40px; text-align: left; }
+
+        .category-title {
+            font-size: 1.3rem;
+            color: #fff;
+            margin-bottom: 20px;
+            padding-left: 12px;
+            border-left: 4px solid var(--nether-orange);
+        }
+
+        .grid-shop {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .shop-card {
+            background: rgba(30, 10, 12, 0.85);
+            border: 1px solid #4a151b;
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .shop-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--nether-orange);
+            box-shadow: 0 5px 20px rgba(255, 102, 0, 0.3);
+        }
+
+        .shop-card.featured {
+            border-color: var(--nether-red);
+            box-shadow: 0 0 20px rgba(255, 51, 51, 0.2);
+        }
+
+        .badge {
+            position: absolute;
+            top: 15px;
+            right: -30px;
+            background: var(--nether-orange);
+            color: #000;
+            font-weight: bold;
+            font-size: 0.7rem;
+            padding: 4px 30px;
+            transform: rotate(45deg);
+            text-transform: uppercase;
+        }
+
+        .item-icon { font-size: 2.5rem; margin-bottom: 15px; }
+        .item-name { font-size: 1.3rem; font-weight: 800; margin-bottom: 10px; }
+        .item-price { font-size: 1.5rem; color: var(--primary-green); font-weight: 800; margin-bottom: 15px; }
+
+        .item-features {
+            list-style: none;
+            color: var(--text-gray);
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .item-features li { margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .item-features li::before { content: "✔"; color: var(--primary-green); }
+
+        .btn-buy {
+            background: transparent;
+            color: var(--nether-orange);
+            border: 2px solid var(--nether-orange);
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.3s;
+            width: 100%;
+            text-transform: uppercase;
+        }
+
+        .btn-buy:hover {
+            background: var(--nether-orange);
+            color: #000;
+            box-shadow: 0 0 15px rgba(255, 102, 0, 0.5);
+        }
+
+        /* --- REGULAMIN --- */
+        #rules { text-align: center; }
+
+        .rules-list {
+            background: rgba(22, 12, 35, 0.85);
+            border: 1px solid #3b1b5e;
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: left;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .rule-item {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .rule-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+        .rule-title { font-weight: 600; font-size: 1.1rem; color: #c084fc; margin-bottom: 5px; }
+        .rule-desc { color: var(--text-gray); font-size: 0.95rem; line-height: 1.5; }
+
+        /* --- SPOŁECZNOŚCI --- */
+        #socials { text-align: center; }
+
+        .social-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+
+        .social-card {
+            background: rgba(10, 22, 35, 0.85);
+            border: 2px solid #133a52;
+            border-radius: 16px;
+            padding: 30px 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            transition: 0.3s ease;
+        }
+
+        .social-card.discord { border-color: rgba(88, 101, 242, 0.4); }
+        .social-card.tiktok { border-color: rgba(255, 0, 80, 0.4); }
+        .social-card.youtube { border-color: rgba(255, 0, 0, 0.4); }
+
+        .social-card:hover { transform: translateY(-6px); }
+        .social-card.discord:hover { border-color: var(--discord-color); box-shadow: 0 8px 25px rgba(88, 101, 242, 0.3); }
+        .social-card.tiktok:hover { border-color: var(--tiktok-color); box-shadow: 0 8px 25px rgba(255, 0, 80, 0.3); }
+        .social-card.youtube:hover { border-color: var(--youtube-color); box-shadow: 0 8px 25px rgba(255, 0, 0, 0.3); }
+
+        .social-icon { font-size: 3.2rem; }
+        .social-title { font-size: 1.4rem; font-weight: 800; }
+        .social-desc { font-size: 0.9rem; color: var(--text-gray); line-height: 1.4; }
+
+        .btn-social-link {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 800;
+            text-transform: uppercase;
+            text-decoration: none;
+            color: #fff;
+            margin-top: 10px;
+            transition: 0.3s;
+            display: inline-block;
+        }
+
+        .btn-social-link.discord { background: var(--discord-color); }
+        .btn-social-link.tiktok { background: var(--tiktok-color); }
+        .btn-social-link.youtube { background: var(--youtube-color); }
+
+        .btn-social-link:hover { filter: brightness(1.2); transform: scale(1.02); }
+
+        /* --- EKIPA (ZARZĄD) --- */
+        #secret { text-align: center; }
+        
+        .team-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .team-tab-btn {
+            background: rgba(20, 18, 28, 0.85);
+            border: 2px solid var(--card-border);
+            color: var(--text-gray);
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+
+        .team-tab-btn:hover {
+            border-color: var(--primary-green);
+            color: #fff;
+        }
+
+        .team-tab-btn.active {
+            background: rgba(85, 255, 85, 0.15);
+            border-color: var(--primary-green);
+            color: var(--primary-green);
+            box-shadow: 0 0 15px rgba(85, 255, 85, 0.25);
+        }
+
+        .team-content-box {
+            display: none;
+            background: rgba(15, 12, 25, 0.85);
+            border: 2px solid var(--card-border);
+            padding: 35px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+
+        .team-content-box.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .staff-card {
+            background: rgba(25, 21, 38, 0.9);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            transition: 0.3s;
+            text-decoration: none;
+        }
+
+        .staff-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-green);
+            box-shadow: 0 5px 20px rgba(85, 255, 85, 0.2);
+        }
+
+        .staff-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 8px;
+            image-rendering: pixelated;
+            border: 2px solid var(--primary-green);
+            box-shadow: 0 0 10px rgba(85, 255, 85, 0.3);
+            background: #000;
+        }
+
+        .staff-name { font-size: 1.1rem; font-weight: 800; color: #fff; }
+        .staff-role { font-size: 0.8rem; color: var(--primary-green); text-transform: uppercase; font-family: 'Press Start 2P', cursive; }
+        .namemc-link { font-size: 0.75rem; color: var(--text-gray); margin-top: -4px; }
+        .empty-team-msg { color: var(--text-gray); font-size: 0.95rem; font-style: italic; padding: 20px; }
+
+        /* --- CHECKOUT --- */
+        .checkout-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 0;
+        }
+
+        .creeper-holder {
+            position: relative;
+            width: 100%;
+            max-width: 480px;
+        }
+
+        .creeper-body-back {
+            position: absolute;
+            top: -65px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 110px;
+            height: 110px;
+            z-index: 1;
+        }
+
+        .creeper-hand-left, .creeper-hand-right {
+            position: absolute;
+            top: 40%;
+            width: 45px;
+            height: 80px;
+            background: #00aa00;
+            border: 4px solid #000;
+            border-radius: 6px;
+            z-index: 3;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .creeper-hand-left { left: -22px; transform: rotate(-12deg); }
+        .creeper-hand-right { right: -22px; transform: rotate(12deg); }
+
+        .pokemon-card {
+            position: relative;
+            z-index: 2;
+            background: linear-gradient(135deg, #ffe100 0%, #e6a100 100%);
+            padding: 14px;
+            border-radius: 18px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.8), 0 0 30px rgba(255, 203, 5, 0.3);
+            border: 4px solid #fff;
+        }
+
+        .pokemon-card-inner {
+            background: #1c1a29;
+            border: 3px solid #2b2640;
+            border-radius: 12px;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .pokemon-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--pokemon-gold);
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+        }
+
+        .card-type {
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.65rem;
+            color: var(--pokemon-gold);
+            text-transform: uppercase;
+        }
+
+        .card-title { font-size: 1.3rem; font-weight: 800; color: #fff; }
+        .card-hp { font-family: 'Press Start 2P', cursive; font-size: 0.8rem; color: var(--primary-green); }
+
+        .checkout-form { display: flex; flex-direction: column; gap: 15px; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; text-align: left; }
+
+        .form-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--pokemon-gold);
+            text-transform: uppercase;
+        }
+
+        .form-input, .form-select {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid var(--card-border);
+            border-radius: 8px;
+            padding: 12px;
+            color: #fff;
+            font-size: 0.95rem;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .form-input:focus, .form-select:focus {
+            border-color: var(--pokemon-gold);
+            box-shadow: 0 0 10px rgba(255, 203, 5, 0.4);
+        }
+
+        .quantity-slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #2b2640;
+            outline: none;
+            accent-color: var(--primary-green);
+            cursor: pointer;
+        }
+
+        .quantity-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .quantity-badge { color: var(--primary-green); font-size: 1rem; font-weight: 800; }
+
+        .checkbox-group { display: flex; align-items: center; gap: 10px; margin-top: 5px; }
+        .checkbox-group input { width: 18px; height: 18px; accent-color: var(--primary-green); cursor: pointer; }
+        .checkbox-group label { font-size: 0.8rem; color: var(--text-gray); cursor: pointer; }
+
+        .btn-submit-order {
+            background: linear-gradient(90deg, #55FF55, #00AA00);
+            color: #000;
+            font-weight: 800;
+            font-size: 1.1rem;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 0 4px 15px rgba(85, 255, 85, 0.4);
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-submit-order:hover { transform: scale(1.02); box-shadow: 0 6px 20px rgba(85, 255, 85, 0.6); }
+
+        footer {
+            text-align: center;
+            padding: 25px 20px;
+            color: var(--text-gray);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            margin-top: auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        @media (max-width: 600px) {
+            .logo { font-size: 2rem; }
+            .hero-title { font-size: 1.6rem; }
+            .hero-title span.player-count { font-size: 2rem; }
+            .corner-creeper { width: 80px; height: 80px; }
+        }
+    </style>
+</head>
+<body class="dimension-home">
+
+    <!-- BACKGROUND -->
+    <div class="bg-container">
+        <div class="creeper-pattern"></div>
+        <div class="ambient-glow glow-1"></div>
+        <div class="ambient-glow glow-2"></div>
+    </div>
+
+    <!-- CREEPER ROGOWY (PRZYCISK DO EKIPY SERWERA) -->
+    <button class="corner-creeper" onclick="showPage('secret', 'dimension-home')" title="Ekipa Serwera">
+        <svg viewBox="0 0 100 100" width="100%" height="100%">
+            <rect x="10" y="10" width="80" height="80" fill="#55FF55" rx="8"/>
+            <rect x="25" y="30" width="18" height="18" fill="#000"/>
+            <rect x="57" y="30" width="18" height="18" fill="#000"/>
+            <rect x="41" y="48" width="18" height="25" fill="#000"/>
+            <rect x="33" y="56" width="34" height="17" fill="#000"/>
+            <rect x="33" y="65" width="10" height="12" fill="#000"/>
+            <rect x="57" y="65" width="10" height="12" fill="#000"/>
+        </svg>
+    </button>
+
+    <header>
+        <div class="logo" onclick="showPage('home', 'dimension-home')">CREEPER<span>.GG</span></div>
+        
+        <!-- DWA PRZYCISKI POWROTU -->
+        <div class="back-nav" id="backNav">
+            <button class="btn-back btn-back-prev" onclick="goPreviousPage()">← Powrót na poprzednią stronę</button>
+            <button class="btn-back" onclick="showPage('home', 'dimension-home')">🏠 Strona Główna</button>
+        </div>
+    </header>
+
+    <main>
+        <!-- STRONA GŁÓWNA -->
+        <section id="home" class="page active">
+            <div class="home-container">
+                <h1 class="hero-title">
+                    Zagraj z <span class="player-count">142</span><br>graczami online
+                </h1>
+                <p class="hero-subtitle">Przejdź przez portal do wybranego wymiaru i rozpocznij grę:</p>
+
+                <div class="home-grid-nav">
+                    <!-- KARTA SKLEPU -->
+                    <div class="nav-card card-shop" onclick="showPage('shop-modes', 'dimension-shop')">
+                        <div class="nav-card-title">Sklep Serwerowy</div>
+                        <div class="nav-card-desc">Wymiar Netheru — Rangi VIP, klucze oraz wyjątkowe pakiety</div>
+                    </div>
+
+                    <!-- KARTA REGULAMINU -->
+                    <div class="nav-card card-rules" onclick="showPage('rules', 'dimension-rules')">
+                        <div class="nav-card-title">Regulamin</div>
+                        <div class="nav-card-desc">Wymiar Endu — Zasady panujące na serwerze i prawa graczy</div>
+                    </div>
+
+                    <!-- KARTA SPOŁECZNOŚCI -->
+                    <div class="nav-card card-social" onclick="showPage('socials', 'dimension-socials')">
+                        <div class="nav-card-title">Społeczności</div>
+                        <div class="nav-card-desc">Portal Sieci — Dołącz do Discorda, TikToka oraz YouTube</div>
+                    </div>
+                </div>
+
+                <!-- BOX IP -->
+                <div class="ip-container" onclick="navigator.clipboard.writeText('creeper.gg'); alert('Skopiowano IP serwera: creeper.gg');">
+                    <div class="ip-text">IP: CREEPER.GG</div>
+                    <div class="ip-hint">Kliknij tutaj, aby skopiować adres serwera (Wersja 1.16 - 1.20+)</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PODSTRONA WYBORU TRYBU -->
+        <section id="shop-modes" class="page">
+            <div class="dimension-badge badge-nether">🔥 Sklep Serwerowy</div>
+            <h2 class="section-title" style="color: var(--nether-orange); margin-bottom: 25px;">Wybierz Tryb</h2>
+
+            <div class="modes-wrapper">
+                <button class="skin-mode-btn" onclick="showPage('shop', 'dimension-shop')">
+                    <div class="firework-box">
+                        <svg class="mc-firework-svg" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                            <path fill="#DA232A" d="M12 0h2v1h-2zM14 1h1v1h-1zM11 1h1v2h-1zM13 2h1v1h-1zM10 2h1v2h-1zM12 3h1v1h-1z"/>
+                            <path fill="#FF4F55" d="M13 1h1v1h-1zM12 2h1v1h-1z"/>
+                            <path fill="#A01319" d="M15 0h1v2h-1zM14 2h1v1h-1z"/>
+                            <path fill="#EAD9B6" d="M9 4h1v1H9zM8 5h1v1H8zM11 3h1v1h-1zM10 4h1v1h-1z"/>
+                            <path fill="#D2BD96" d="M7 6h1v1H7zM6 7h1v1H6zM9 5h1v1H9zM8 6h1v1H8z"/>
+                            <path fill="#F8E9C9" d="M11 4h1v1h-1zM10 3h1v1h-1z"/>
+                            <path fill="#B51B21" d="M9 3h1v1H9zM8 4h1v1H8zM7 5h1v1H7z"/>
+                            <path fill="#845028" d="M5 8h2v2H5zM3 10h2v2H3zM1 12h2v2H1z"/>
+                            <path fill="#5A3519" d="M4 11h1v1H4zM2 13h1v1H2zM0 15h1v1H0z"/>
+                            <path fill="#FFC800" d="M0 14h2v1H0zM1 13h1v1H1z"/>
+                            <path fill="#FF6A00" d="M0 15h1v1H0z"/>
+                        </svg>
+                    </div>
+                    <span class="skin-mode-text">SkyPvP Practice</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- SKLEP (OFERTY) -->
+        <section id="shop" class="page">
+            <div class="dimension-badge badge-nether">🔥 Wymiar: Nether</div>
+            <h2 class="section-title" style="color: var(--nether-orange); margin-bottom: 30px;">Sklep Serwerowy — Oferty</h2>
+
+            <!-- RANGI -->
+            <div class="shop-category">
+                <h3 class="category-title">Rangi VIP</h3>
+                <div class="grid-shop">
+                    <div class="shop-card">
+                        <div>
+                            <div class="item-icon">🟢</div>
+                            <div class="item-name" style="color: #55FF55;">VIP</div>
+                            <div class="item-price">10.00 PLN</div>
+                            <ul class="item-features">
+                                <li>Ranga na 30 dni</li>
+                                <li>Rezerwacja slotu na serwerze</li>
+                                <li>Pisanie w kolorze na czacie</li>
+                                <li>Kit VIP co 24 godziny</li>
+                                <li>+30% w strefie AFK</li>
+                            </ul>
+                        </div>
+                        <button class="btn-buy" onclick="openCheckout('Ranga VIP', 10.00, false)">Kup teraz</button>
+                    </div>
+
+                    <div class="shop-card">
+                        <div>
+                            <div class="item-icon">🟡</div>
+                            <div class="item-name" style="color: #FFFF55;">SVIP</div>
+                            <div class="item-price">20.00 PLN</div>
+                            <ul class="item-features">
+                                <li>Dostęp do komendy /craft i /ec</li>
+                                <li>Dostęp do komendy /repair</li>
+                                <li>Dodatkowe 3 home'y (/sethome)</li>
+                                <li>Kit SVIP co 24 godziny</li>
+                                <li>+45% w strefie AFK</li>
+                            </ul>
+                        </div>
+                        <button class="btn-buy" onclick="openCheckout('Ranga SVIP', 20.00, false)">Kup teraz</button>
+                    </div>
+
+                    <div class="shop-card featured">
+                        <div class="badge">HIT</div>
+                        <div>
+                            <div class="item-icon">🟣</div>
+                            <div class="item-name" style="color: #a855f7;">M VIP</div>
+                            <div class="item-price">40.00 PLN</div>
+                            <ul class="item-features">
+                                <li>Dostęp do komendy /heal i /feed</li>
+                                <li>Dostęp do komendy /ec i /repair all</li>
+                                <li>Dostęp do kita MVIP</li>
+                                <li>Wszystkie przywileje niższych rang</li>
+                            </ul>
+                        </div>
+                        <button class="btn-buy" onclick="openCheckout('Ranga MVIP', 40.00, false)">Kup teraz</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- KLUCZE POJEDYNCZE -->
+            <div class="shop-category">
+                <h3 class="category-title">Pojedyncze Klucze</h3>
+                <div class="grid-shop">
+                    <div class="shop-card">
+                        <div>
+                            <div class="item-icon">🔑</div>
+                            <div class="item-name">Rzadki Klucz</div>
+                            <div class="item-price">1.50 PLN / szt.</div>
+                            <ul class="item-features">
+                                <li>Otwiera Rzadką Skrzynię na spawnie</li>
+                                <li>Wybierz dokładną ilość suwakiem (1-100)</li>
+                            </ul>
+                        </div>
+                        <button class="btn-buy" onclick="openCheckout('Rzadki Klucz', 1.50, true)">Kup teraz</button>
+                    </div>
+
+                    <div class="shop-card">
+                        <div>
+                            <div class="item-icon">🗝️</div>
+                            <div class="item-name">Epicki Klucz</div>
+                            <div class="item-price">3.50 PLN / szt.</div>
+                            <ul class="item-features">
+                                <li>Otwiera Epicką Skrzynię na spawnie</li>
+                                <li>Wybierz dokładną ilość suwakiem (1-100)</li>
+                            </ul>
+                        </div>
+                        <button class="btn-buy" onclick="openCheckout('Epicki Klucz', 3.50, true)">Kup teraz</button>
+                    </div>
+
+                    <div class="shop-card featured">
+                        <div class="badge">LEGEND</div>
+                        <div>
+                            <div class="item-icon">👑🗝️</div>
+                            <div class="item-name">Legendarny Klucz</div>
+                            <div class="item-price">15.00 PLN / szt.</div>
+                            <ul class="item-features">
+                                <li>Gwarantuje najrzadsze przedmioty</li>
+                                <li>Wybierz dokładną ilość suwakiem (1-100)</li>
+                            </ul>
+                        </div>
+                        <button class="btn-buy" onclick="openCheckout('Legendarny Klucz', 15.00, true)">Kup teraz</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ZESTAWY KLUCZY -->
+            <div class="shop-category">
+                <h3 class="category-title">Zestawy Kluczy</h3>
+                <div class="grid-shop">
+                    <div class="shop-card">
+                        <div>
+                            <div class="item-icon">📦</div>
+                            <div class="item-name">Mały Zestaw</div>
+                            <div class="item-price">15.00 PLN</div>
+                            <ul class="item-features">
+                                <li>5x Klucz Epicki</li>
+                                <li>8x Klucz Rzadki</li>
+                            </ul>
+                        </div>
+                        <button class="btn-buy" onclick="openCheckout('Mały Zestaw Kluczy', 15.00, false)">Kup teraz</button>
+                    </div>
+
+                    <div class="shop-card">
+                        <div>
+                            <div class="item-icon">📦📦</div>
+                            <div class="item-name">Średni Zestaw</div>
+                            <div class="item-price">25.00 PLN</div>
+                            <ul class="item-features">
+                                <li>8x Klucz Epicki</li>
+                                <li>12x Klucz Rzadki</li>
+                                <li>1x Klucz Legendarny</li>
+                            </ul>
+                        </div>
+                        <button class="btn-buy" onclick="openCheckout('Średni Zestaw Kluczy', 25.00, false)">Kup teraz</button>
+                    </div>
+
+                    <div class="shop-card featured">
+                        <div class="badge">BESTSELLER</div>
+                        <div>
+                            <div class="item-icon">🎁📦</div>
+                            <div class="item-name">Duży Zestaw</div>
+                            <div class="item-price">50.00 PLN</div>
+                            <ul class="item-features">
+                                <li>4x Klucz Legendarny</li>
+                                <li>10x Klucz Epicki</li>
+                                <li>16x Klucz Rzadki</li>
+                            </ul>
+                        </div>
+                        <button class="btn-buy" onclick="openCheckout('Duży Zestaw Kluczy', 50.00, false)">Kup teraz</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PODSTRONA EKIPA (ZARZĄD) -->
+        <section id="secret" class="page">
+            <div class="dimension-badge badge-socials">👑 Zarząd Serwera</div>
+            <h2 class="section-title" style="color: var(--primary-green); margin-bottom: 25px;">Ekipa Creeper.gg</h2>
+
+            <div class="team-tabs">
+                <button class="team-tab-btn active" onclick="switchTab('owners', event)">Właściciele</button>
+                <button class="team-tab-btn" onclick="switchTab('admins', event)">Admini</button>
+                <button class="team-tab-btn" onclick="switchTab('helpers', event)">Helperzy</button>
+            </div>
+
+            <div id="tab-owners" class="team-content-box active">
+                <h3 style="color: var(--primary-green); margin-bottom: 15px; font-size: 1.2rem;">Główni Właściciele Serwera</h3>
+                <div class="team-grid">
+                    <a href="https://namemc.com/profile/criperi" target="_blank" class="staff-card">
+                        <img src="https://crafatar.com/avatars/criperi?size=64&helm" alt="criperi" class="staff-avatar" onerror="this.src='https://minotar.net/avatar/criperi/64.png'">
+                        <div class="staff-name">criperi</div>
+                        <div class="staff-role">Właściciel</div>
+                        <div class="namemc-link">Sprawdź na NameMC ↗</div>
+                    </a>
+                    <a href="https://namemc.com/profile/kikrus" target="_blank" class="staff-card">
+                        <img src="https://crafatar.com/avatars/kikrus?size=64&helm" alt="kikrus" class="staff-avatar" onerror="this.src='https://minotar.net/avatar/kikrus/64.png'">
+                        <div class="staff-name">kikrus</div>
+                        <div class="staff-role">Właściciel</div>
+                        <div class="namemc-link">Sprawdź na NameMC ↗</div>
+                    </a>
+                </div>
+            </div>
+
+            <div id="tab-admins" class="team-content-box">
+                <h3 style="color: var(--end-purple); margin-bottom: 15px; font-size: 1.2rem;">Administratorzy Serwera</h3>
+                <div class="empty-team-msg">Brak aktywnych administratorów w tej sekcji. Wolne rekrutacje na naszym Discordzie!</div>
+            </div>
+
+            <div id="tab-helpers" class="team-content-box">
+                <h3 style="color: var(--portal-cyan); margin-bottom: 15px; font-size: 1.2rem;">Helperzy i Moderatorzy</h3>
+                <div class="empty-team-msg">Trwa nabór do grona helperów. Sprawdź wymagania na Discordzie!</div>
+            </div>
+        </section>
+
+        <!-- REGULAMIN -->
+        <section id="rules" class="page">
+            <div class="dimension-badge badge-end">👁️ Wymiar: End</div>
+            <h2 class="section-title" style="color: #c084fc; margin-bottom: 30px;">Regulamin Serwera</h2>
+
+            <div class="rules-list">
+                <div class="rule-item">
+                    <div class="rule-title">1. Szacunek i kultura</div>
+                    <div class="rule-desc">Szanuj innych graczy oraz administrację. Zakazane jest stosowanie mowy nienawiści, wyzywanie oraz prowokowanie kłótni na czacie.</div>
+                </div>
+                <div class="rule-item">
+                    <div class="rule-title">2. Zakaz używania wspomagaczy (Cheating)</div>
+                    <div class="rule-desc">Używanie modyfikacji dających przewagę (X-Ray, KillAura, Fly itp.) jest surowo zabronione i skutkuje permanentnym banem.</div>
+                </div>
+                <div class="rule-item">
+                    <div class="rule-title">3. Zakaz wykorzystywania błędów (Bugi)</div>
+                    <div class="rule-desc">Wszelkie wykryte błędy gry lub serwera należy natychmiast zgłaszać administracji. Wykorzystywanie ich na własną korzyść jest karane.</div>
+                </div>
+                <div class="rule-item">
+                    <div class="rule-title">4. Handel poza serwerem</div>
+                    <div class="rule-desc">Zakazany jest handel przedmiotami z gry za realne pieniądze poza oficjalnym sklepem Creeper.gg.</div>
+                </div>
+                <div class="rule-item">
+                    <div class="rule-title">5. Bezpieczeństwo konta</div>
+                    <div class="rule-desc">Każdy gracz odpowiada za własne konto. Administracja nigdy nie prosi o Twoje hasło!</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SPOŁECZNOŚCI -->
+        <section id="socials" class="page">
+            <div class="dimension-badge badge-socials">🌐 Portal Społeczności</div>
+            <h2 class="section-title" style="color: var(--portal-cyan); margin-bottom: 10px;">Społeczności Serwera</h2>
+            <p style="text-align: center; color: var(--text-gray); margin-bottom: 30px;">
+                Dołącz do naszych oficjalnych kanałów i bądź na bieżąco!
+            </p>
+
+            <div class="social-grid">
+                <div class="social-card discord">
+                    <div class="social-icon">💬</div>
+                    <div class="social-title">Discord</div>
+                    <div class="social-desc">Główny czat społeczności, pomoc administracji oraz konkursy!</div>
+                    <a href="https://discord.gg/creepergg" target="_blank" class="btn-social-link discord">Dołącz do Discorda</a>
+                </div>
+
+                <div class="social-card tiktok">
+                    <div class="social-icon">🎵</div>
+                    <div class="social-title">TikTok</div>
+                    <div class="social-desc">Krótkie filmiki z serwera, zapowiedzi aktualizacji i śmieszne momenty!</div>
+                    <a href="https://tiktok.com/@creeper.gg" target="_blank" class="btn-social-link tiktok">Zobacz TikToka</a>
+                </div>
+
+                <div class="social-card youtube">
+                    <div class="social-icon">📺</div>
+                    <div class="social-title">YouTube</div>
+                    <div class="social-desc">Oficjalne zwiastuny edycji, poradniki oraz materiały od twórców!</div>
+                    <a href="https://youtube.com/@creepergg" target="_blank" class="btn-social-link youtube">Oglądaj YouTube</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- FORMULARZ ZAKUPU - INTEGRACJA Z HOTPAY -->
+        <section id="checkout" class="page">
+            <h2 class="section-title" style="margin-bottom: 30px; text-align: center;">Finalizacja Zakupu</h2>
+            
+            <div class="checkout-wrapper">
+                <div class="creeper-holder">
+                    <svg class="creeper-body-back" viewBox="0 0 100 100">
+                        <rect width="100" height="100" fill="#00aa00" rx="12"/>
+                        <rect x="15" y="20" width="22" height="22" fill="#000"/>
+                        <rect x="63" y="20" width="22" height="22" fill="#000"/>
+                        <rect x="39" y="42" width="22" height="30" fill="#000"/>
+                        <rect x="28" y="52" width="44" height="20" fill="#000"/>
+                        <rect x="28" y="65" width="13" height="15" fill="#000"/>
+                        <rect x="59" y="65" width="13" height="15" fill="#000"/>
+                    </svg>
+
+                    <div class="creeper-hand-left"></div>
+                    <div class="creeper-hand-right"></div>
+
+                    <div class="pokemon-card">
+                        <div class="pokemon-card-inner">
+                            <div class="pokemon-card-header">
+                                <div>
+                                    <span class="card-type">Karta Przedmiotu</span>
+                                    <div class="card-title" id="checkoutItemName">Przedmiot</div>
+                                </div>
+                                <div class="card-hp" id="checkoutItemPrice">0.00 PLN</div>
+                            </div>
+
+                            <!-- FORMULARZ PRZESYŁAJĄCY DANE DO HOTPAY.PHP -->
+                            <form class="checkout-form" action="hotpay.php" method="POST">
+                                <input type="hidden" name="item" id="formItemName" value="">
+                                <input type="hidden" name="price" id="formItemPrice" value="">
+
+                                <div class="form-group" id="quantityGroup" style="display: none;">
+                                    <div class="quantity-display">
+                                        <label for="keyQuantity">Wybierz ilość:</label>
+                                        <span class="quantity-badge" id="quantityVal">1 szt.</span>
+                                    </div>
+                                    <input type="range" id="keyQuantity" class="quantity-slider" min="1" max="100" value="1" oninput="updatePrice()">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="playerNick">Nick z Minecrafta:</label>
+                                    <input type="text" id="playerNick" name="nick" class="form-input" placeholder="Wpisz swój nick..." required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="paymentMethod">Metoda Płatności:</label>
+                                    <select id="paymentMethod" name="method" class="form-select" required>
+                                        <option value="HOTPAY" selected>HotPay (BLIK, PSC, Przelew)</option>
+                                    </select>
+                                </div>
+
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="acceptRules" required>
+                                    <label for="acceptRules">Akceptuję regulamin serwera Creeper.gg</label>
+                                </div>
+
+                                <button type="submit" class="btn-submit-order">Przejdź do płatności HotPay</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        &copy; 2026 Creeper.gg. Strona nie jest powiązana z Mojang AB.
+    </footer>
+
+    <script>
+        let currentUnitPrice = 0;
+        let isQuantityItem = false;
+        let baseItemName = "";
+
+        let pageHistory = [];
+        let currentPageState = { id: 'home', dimension: 'dimension-home' };
+
+        // Sprawdzanie czy wróciliśmy z płatności
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('status') === 'success') {
+                alert('Płatność przebiegła pomyślnie! Przedmiot zostanie przyznany w grze.');
+            } else if (urlParams.get('status') === 'error') {
+                alert('Płatność została anulowana lub wystąpił błąd.');
+            }
+        });
+
+        function showPage(pageId, dimensionClass) {
+            if (currentPageState.id !== pageId) {
+                pageHistory.push({ id: currentPageState.id, dimension: currentPageState.dimension });
+            }
+
+            currentPageState = { id: pageId, dimension: dimensionClass };
+
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => page.classList.remove('active'));
+
+            const targetPage = document.getElementById(pageId);
+            if(targetPage) {
+                targetPage.classList.add('active');
+            }
+
+            document.body.className = dimensionClass || 'dimension-home';
+
+            const backNav = document.getElementById('backNav');
+            if (pageId === 'home') {
+                backNav.style.display = 'none';
+            } else {
+                backNav.style.display = 'flex';
+            }
+
+            window.scrollTo(0, 0);
+        }
+
+        function goPreviousPage() {
+            if (pageHistory.length > 0) {
+                const prev = pageHistory.pop();
+                currentPageState = prev;
+
+                const pages = document.querySelectorAll('.page');
+                pages.forEach(page => page.classList.remove('active'));
+
+                const targetPage = document.getElementById(prev.id);
+                if(targetPage) {
+                    targetPage.classList.add('active');
+                }
+
+                document.body.className = prev.dimension || 'dimension-home';
+
+                const backNav = document.getElementById('backNav');
+                if (prev.id === 'home') {
+                    backNav.style.display = 'none';
+                } else {
+                    backNav.style.display = 'flex';
+                }
+
+                window.scrollTo(0, 0);
+            } else {
+                showPage('home', 'dimension-home');
+            }
+        }
+
+        function switchTab(tabName, event) {
+            const contents = document.querySelectorAll('.team-content-box');
+            contents.forEach(box => box.classList.remove('active'));
+
+            const buttons = document.querySelectorAll('.team-tab-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById('tab-' + tabName).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        function openCheckout(itemName, unitPrice, hasSlider) {
+            baseItemName = itemName;
+            currentUnitPrice = unitPrice;
+            isQuantityItem = hasSlider;
+
+            const quantityGroup = document.getElementById('quantityGroup');
+            const slider = document.getElementById('keyQuantity');
+
+            if (hasSlider) {
+                quantityGroup.style.display = 'flex';
+                slider.value = 1;
+                document.getElementById('quantityVal').innerText = "1 szt.";
+            } else {
+                quantityGroup.style.display = 'none';
+            }
+
+            updatePrice();
+            showPage('checkout', 'dimension-shop');
+        }
+
+        function updatePrice() {
+            let finalName = baseItemName;
+            let totalPrice = currentUnitPrice;
+
+            if (isQuantityItem) {
+                const qty = parseInt(document.getElementById('keyQuantity').value);
+                totalPrice = (qty * currentUnitPrice);
+                document.getElementById('quantityVal').innerText = qty + " szt.";
+                finalName = `${baseItemName} (x${qty})`;
+            }
+
+            document.getElementById('checkoutItemName').innerText = finalName;
+            document.getElementById('checkoutItemPrice').innerText = `${totalPrice.toFixed(2)} PLN`;
+
+            // Wypełnienie ukrytych pól dla pliku PHP
+            document.getElementById('formItemName').value = finalName;
+            document.getElementById('formItemPrice').value = totalPrice.toFixed(2);
+        }
+    </script>
+</body>
+</html>
